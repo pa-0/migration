@@ -7,7 +7,7 @@ from os.path import join as pjoin
 from svn_utils import *
 
 def git_svn_clone(branch):
-    dest = pjoin(root_dir(),"_checkouts","svn_%s" % branch)
+    dest = pjoin(root_dir(),"checkouts","svn_%s" % branch)
     rc_start_revs = svn_rc_creation_map()
     print "[checking git svn clone at %s]" % dest
     with cchdir(dest):
