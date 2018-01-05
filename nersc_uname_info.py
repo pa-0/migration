@@ -6,74 +6,28 @@
 import sys
 import json
 
-# from svn_utils.svn_list_authors()
-def svn_authors():
-    return [
-      "alexanda", 
-      "miller86", 
-      "selby", 
-      "sveta", 
-      "mblair", 
-      "rbleile", 
-      "jimeliot", 
-      "fogal1", 
-      "alister", 
-      "cyrush", 
-      "ahern", 
-      "pascal", 
-      "mlarsen", 
-      "loring", 
-      "semeraro", 
-      "js9", 
-      "sisneros", 
-      "allens", 
-      "brownlee", 
-      "pnav", 
-      "oruebel", 
-      "whitlocb", 
-      "hrchilds", 
-      "rhudson", 
-      "shelly", 
-      "sidshank", 
-      "kbensema", 
-      "hota", 
-      "garth", 
-      "maheswar", 
-      "dskinner", 
-      "bonnell", 
-      "tarwater", 
-      "cary", 
-      "prabhat", 
-      "kgriffin", 
-      "wheeler", 
-      "laney", 
-      "cook47", 
-      "deines", 
-      "ghweber", 
-      "hkrishna", 
-      "iulian", 
-      "gmorris2", 
-      "treadway", 
-      "brugger", 
-      "kdawes", 
-      "dbremer", 
-      "iuri", 
-      "knolla", 
-      "eewing", 
-      "camp", 
-      "jcanders", 
-      "pugmire", 
-      "apletzer", 
-      "spetruzz", 
-      "mdurant", 
-      "camc", 
-      "stratton"
-    ]
+from svn_utils import *
+
+# Current gaps:
+# warning: uncovered authors:
+# [
+#   "alexanda"
+# ]
+#  from nersc: David Alexander
+# 
+# warning: authors missing email:
+# [
+#   "sidshank",  # sci email?
+#   "kdawes", # univ of oregon email?
+#   "pascal", # sci email?
+#   "mblair", # llnl email?
+#   "brownlee", # sci email?
+# ]
 
 # details pulled from:  src/svn_bin/nersc_username_to_email
 def uname_info():
     r = {
-    "ahren":  {"name" : "Sean Ahern",
+    "ahern":  {"name" : "Sean Ahern",
                "afil" : "Oak Ridge National Laboratory",
                "email": "ahern@ornl.gov"},
     #
@@ -214,7 +168,104 @@ def uname_info():
     #
     "alister":  {"name" : "Alister Maguire",
                  "afil" : "Lawrence Livermore National Laboratory",
-                 "email": "maguire7@llnl.gov"}
+                 "email": "maguire7@llnl.gov"},
+    #
+    "laney":  {"name" : "Dan Laney",
+                 "afil" : "Lawrence Livermore National Laboratory",
+                 "email": "laney1@llnl.gov"},
+    #
+    "mlarsen":  {"name" : "Matt Larsen",
+                 "afil" : "Lawrence Livermore National Laboratory",
+                 "email": "larsen30@llnl.gov"},
+    #
+    "tarwater":  {"name" : "Ellen Tarwater-Clower",
+                 "afil" : "Lawrence Livermore National Laboratory",
+                 "email": "tarwaterclow1@llnl.gov"},
+    #
+    "treadway":  {"name" : "Tom Treadway",
+                 "afil" : "Lawrence Livermore National Laboratory",
+                 "email": "treadway1@llnl.gov"},
+    #
+    "shelly":  {"name" : "Shelly Prevost",
+                 "afil" : "Lawrence Livermore National Laboratory",
+                 "email": "prevost3@llnl.gov"},
+    #
+    "mblair":  {"name" : "Mark Blair",
+                 "afil" : "Lawrence Livermore National Laboratory",
+                 "email": "TODO"},
+    #
+    "prabhat":  {"name" : "Prabhat",
+                 "afil" : "Lawrence Berkeley National Laboratory",
+                 "email": "prabhat@lbl.gov"},
+    #
+    "sisneros":  {"name" : "Robert Sisneros",
+                  "afil" : "NCSA, University of Illinois",
+                  "email": "sisneros@illinois.edu"},
+    #
+    "knolla":  {"name" : "Aaron Knoll",
+                "afil" : "SCI Institute, University of Utah",
+                "email": "knolla@sci.utah.edu "},
+    #
+    "pascal":  {"name" : "Pascal Grosset",
+                "afil" : "SCI Institute, University of Utah",
+                "email": "TODO"},
+    #
+    "brownlee":  {"name" : "Carson Brownlee",
+                "afil" : "SCI Institute, University of Utah",
+                "email": "TODO"},
+    #
+    "garth":  {"name" : "Christoph Garth",
+                "afil" : "UC Davis",
+                "email": "cgarth@ucdavis.edu"},
+    #
+    "dskinner":  {"name" : "David Skinner",
+                "afil" : "Lawrence Berkeley National Laboratory",
+                "email": "deSkinner@lbl.gov"},
+
+    #
+    "sveta":  {"name" : "Svetlana Shasharina",
+                "afil" : "Tech-X Corp",
+                "email": "sveta@txcorp.com"},
+    #
+    "cary":   {"name" : "John R. Cary",
+                "afil" : "Tech-X Corp",
+                "email": "cary@txcorp.com"},
+    #
+    "apletzer": {"name" : "Alexander Pletzer",
+                 "afil" : "Tech-X Corp",
+                 "email": "pletzer@txcorp.com"},
+    #
+    "gmorris2": {"name" : "Garrett Morrison",
+                 "afil" : "University of Oregon",
+                 "email": "gmorriso@cs.uoregon.edu"},
+    #
+    "kdawes":   {"name" : "Kirsten Dawes",
+                 "afil" : "University of Oregon",
+                 "email": "TODO"},
+    #
+    "hota":   {"name" : "Alok Hota",
+                "afil" : "University of Tennessee",
+                "email": "alok@utk.edu"},
+    #
+    "spetruzz":   {"name" : "Steve Petruzza",
+                   "afil" : "SCI Institute, University of Utah",
+                   "email": "spetruzza@sci.utah.edu"},
+    #
+    "eewing":   {"name" : "Elliott Ewing",
+                 "afil" : "University of Oregon",
+                 "email": "eewing@cs.uoregon.edu"},
+    #
+    "sidshank": {"name" : "Siddharth Shankar",
+                 "afil" : "SCI Institute, University of Utah",
+                 "email": "TODO"},
+    #
+    "jcanders": {"name" : "John C. Anderson",
+                 "afil" : "UC Davis & Lawrence Livermore National Laboratory",
+                 "email": "anderson@cs.ucdavis.edu"},
+    #
+    "deines": {"name" : "Eduard Deines",
+                 "afil" : "UC Davis",
+                 "email": "edeines@ucdavis.edu"},
     }
     return r
 
@@ -222,19 +273,32 @@ def uname_info():
 def uncovered_authors():
     res = []
     umap = uname_info()
-    for author in svn_authors():
+    for author in svn_ls_authors():
         if not author in umap.keys():
             res.append(author)
     return res
 
-ua = uncovered_authors()
-if len(ua) > 0:
-    print "warning: uncovered authors:"
-    print json.dumps(ua,indent=2)
+def authors_missing_email():
+    res = []
+    umap = uname_info()
+    for k,v in uname_info().items():
+        if v["email"].count("@") == 0:
+            res.append(k)
+    return res
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
         print json.dumps(uname_info()[sys.argv[1]],indent=2)
     else:
         print json.dumps(uname_info(),indent=2)
+    ua = uncovered_authors()
+    if len(ua) > 0:
+        print "warning: uncovered authors:"
+        print json.dumps(ua,indent=2)
+    me = authors_missing_email()
+    if len(ua) > 0:
+        print "warning: authors missing email:"
+        print json.dumps(me,indent=2)
+
+    
 

@@ -21,4 +21,6 @@ rc_keys.sort(key=release_key)
 for k in rc_keys:
     print k, rc_map[k]
 
-print json.dumps(svn_list_authors(),indent=2)
+print json.dumps(svn_ls_authors(),indent=2)
+
+svn_generate_authors_file()
