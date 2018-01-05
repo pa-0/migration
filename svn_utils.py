@@ -7,6 +7,9 @@ from os.path import join as pjoin
 
 from general_utils import *
 
+from nersc_uname_info import uname_info as nersc_uname_info
+
+
 class Tag(object):
     def __init__(self,string_val):
         self.val = [ int(v) for v in string_val.split(".")]
@@ -51,6 +54,13 @@ def visit_svn_url(uname="cyrush",anon=False):
     else:
         return "http://visit.ilight.com/svn/visit/"
 
+
+def svn_generate_authors_file():
+    f = open("info_nersc_authors.txt","w")
+    for k,v in nersc_uname_info().items():
+        if v["email"].count("@") == 0:
+            print "warning: missing email for %s" % k
+        f.write("%s = %s <%s>\n" % (k,v["name"],v["email"]))
 
 def svn_ls_branches(subpath = "branches"):
     "lists branches at given subpath"
@@ -147,7 +157,7 @@ def svn_rc_creation_map():
     save_json("svn_rc_creation_map",res)
     return res
 
-def svn_list_authors():
+def svn_ls_authors():
     "returns a list of all svn authors"
     r = read_json("svn_authors")
     if not r is None:
