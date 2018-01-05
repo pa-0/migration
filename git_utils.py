@@ -58,10 +58,6 @@ def git_svn_rc_branch_sha_info(rc):
     return rc_rev, rc_trunk_root, sha
 
 
-def git_svn_rc_checkout_dir(rc):
-    return pjoin(root_dir(),"checkouts","svn_" + rc,"src")
-
-
 def git_repo_dir():
     return pjoin(root_dir(),"git_repo","visit-src")
 

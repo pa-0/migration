@@ -225,11 +225,9 @@ def svn_check_rc_git_svn_repos():
             print "missing checkout of %s" % rc
             ok = False
     return ok
- 
-    
 
 
-def git_svn_checkout_src(subpath):
+def git_svn_clone_src(subpath):
     "git svn clone 'src' for any subpath"
     if not os.path.isdir("src"):
         sexe("git svn clone %s" % pjoin(visit_svn_url(),subpath,"src"))
@@ -256,6 +254,16 @@ def git_svn_rev_to_sha_map(src_dir):
         save_json("svn_rev_to_sha_map",res)
         return res
 
+def git_svn_check_clone():
+    rcode = 1
+    if os.path.isdir("src"):
+        with cchdir("src"):
+            rcode, rout = sexe("git svn fetch", fatal_on_error = False)
+    return rcode == 0
+
+
+def git_svn_rc_checkout_dir(rc):
+    return pjoin(root_dir(),"checkouts","svn_" + rc,"src")
 
 
 

@@ -27,7 +27,14 @@ def git_graft():
            git_create_branch_for_tag_release(release)
            git_merge_release_to_master_and_tag(release)
 
-git_graft()
+#git_graft()
+rcs = svn_ls_rc_branches()
+for rc in rcs:
+    for release in svn_release_tags_for_rc(rc):
+        git_create_branch_for_tag_release(release)
+        git_merge_release_to_master_and_tag(release)
+
+
 
 # create each release on master
 # for each tag, prep a branch off of the rc that will provide a source for us
