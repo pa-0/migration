@@ -4,6 +4,9 @@
 
 from svn_utils import *
 
+rcs  = svn_ls_rc_branches()
+tags = svn_ls_tags()
+
 tag_map = svn_tag_rev_map()
 tag_keys =tag_map.keys()
 tag_keys.sort(key=release_key)
