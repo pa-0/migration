@@ -3,13 +3,13 @@ Scripts for VisIt's SVN to Github Migration
 
 To craft a new set of git repos, we: 
 
-##1) Obtain metadata from svn repo (records of authors, tags, etc)
+## Obtain metadata from svn repo (records of authors, tags, etc)
 
 ```bash
 python svn_fetch_info.py
 ```
 
-##2) Obtain trunk and svn RC branches using git svn
+## Obtain trunk and svn RC branches using git svn
 
 This takes quite while due to the size of our repo, ssh disconnects, and failed git prune operations.
 Will automate soon to resume and perserve through known failure modes. 
@@ -27,10 +27,10 @@ Will automate soon to resume and perserve through known failure modes.
    git svn clone svn+ssh://{user}@edison.nersc.gov/project/projectdirs/visit/svn/visit/branches/2.0RC/src
 ````
 
-We alos need to resolve svn author mappings, see _nersc_uname_info.py_
+We alos need to resolve svn author mappings, see `nersc_uname_info.py`
 
 
-##3) Construct a git repo that grafts our old release structure into a gitflow structure
+## Construct a git repo that grafts our old release structure into a gitflow structure
 
 ```bash
 python git_graft.py
