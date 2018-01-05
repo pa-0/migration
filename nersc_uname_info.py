@@ -13,7 +13,6 @@ from svn_utils import *
 # warning: authors missing email:
 # [
 #   "sidshank",  # sci email?
-#   "kdawes", # univ of oregon email?
 #   "pascal", # sci email?
 #   "mblair", # llnl email?
 #   "brownlee", # sci email?
