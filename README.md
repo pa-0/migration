@@ -21,7 +21,7 @@ You should be able to keep running the following script iteratively until everyt
 python svn_git_clone_branches.py
 ```
 
-We have a few email address that we need to resolve for svn author mappings, see `nersc_uname_info.py`
+Note: We have a few email address that we need to resolve for svn author mappings, see `nersc_uname_info.py`
 
 
 ### Construct a git repo that grafts our old release structure into a gitflow structure
@@ -41,7 +41,7 @@ python git_graft.py
     are related to symlinks, and can easily be resolved with automated `git checkout --thiers` arm-twisting. 
       
      * For each release on the RC:
-       # Tag the start and ending commits for the release on the RC
+       * Tag the start and ending commits for the release on the RC
        * Create a branch (rX.Y.Z) that includes proper subset of RC commits for the release
        * Squash merge this into a  single commit on master 
          
@@ -50,9 +50,9 @@ python git_graft.py
        * Tag the new master commit with vX.Y.Z
 
 
-##  Other TODOS and future scripts
+##  TODOS and future scripts
 
-* Extend scripts to pull out data, test, and other svn entries
+* Extend scripts to pull out data, test, and other history from svn
 * Create script to obtain all unique TPL tarballs from SVN (we will host outside of git)
 
 
