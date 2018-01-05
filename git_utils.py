@@ -145,8 +145,11 @@ def git_create_branch_for_tag_release(tag):
     print "[%s tag range on git %s Branch: %s %s (svn revs: %s %s)]" % (tag,rc,sha_st,sha_end, rv_st,rv_end)
     with cchdir(git_repo_dir()):
         sexe("git checkout %s" % rc)
+        sexe('git tag -a r%s.release.start -m "tag r%s start" %s' % (tag,tag,sha_st))
+        sexe('git tag -a r%s.release.end   -m "tag r%s end" %s' % (tag,tag,sha_end))
         sexe("git checkout -b r%s %s" % (tag,sha_st))
         sexe("git merge %s" % sha_end)
+
 
 def git_merge_release_to_master_and_tag(tag):
     with cchdir(git_repo_dir()):

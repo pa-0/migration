@@ -1,3 +1,7 @@
+# our stuff
+git_repo
+checkouts
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

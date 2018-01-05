@@ -10,7 +10,18 @@ from general_utils import *
 from nersc_uname_info import uname_info as nersc_uname_info
 
 
-class Tag(object):
+class SVNRev(object):
+    def __init__(self,string_val):
+        self.val = int(string_val[1:]) # remove leading r
+
+    def number(self):
+        return self.val
+
+    def __str__(self):
+        return "r%d" % self.value
+
+
+class SVNTag(object):
     def __init__(self,string_val):
         self.val = [ int(v) for v in string_val.split(".")]
 
@@ -176,7 +187,7 @@ def svn_ls_authors():
 
 def svn_tag_to_rc(tag):
     "converts a tag string to rc name"
-    return Tag(tag).rc()
+    return SVNTag(tag).rc()
 
 def svn_tag_range(tag):
     """
@@ -188,7 +199,7 @@ def svn_tag_range(tag):
     
     # rev_start is either the prev release
     #  or its the beginning of the rc branch
-    t_val = Tag(tag)
+    t_val = SVNTag(tag)
     if t_val.patch() == 0:
         rc = svn_tag_to_rc(tag)
         rev_start = svn_rc_creation_map()[rc]
@@ -237,13 +248,28 @@ def svn_check_rc_git_svn_repos():
     return ok
 
 
-def git_svn_clone_src(subpath):
+def git_svn_clone_src(subpath,rev=None):
     "git svn clone 'src' for any subpath"
+    fetch_range = ""
+    if not rev is None:
+       fetch_range = " -%s:HEAD " % rev
+    print fetch_range
     if not os.path.isdir("src"):
-        sexe("git svn clone %s" % pjoin(visit_svn_url(),subpath,"src"))
+        authors_txt = pjoin(root_dir(),"info_nersc_authors.txt")
+        cmd = "git svn clone --authors-file=%s" % authors_txt
+        cmd += fetch_range
+        cmd += pjoin(visit_svn_url(),subpath,"src")
+        sexe(cmd)
     else:
         with chdir("src"):
-            sexe("git svn fetch")
+            # check for gc file, prune case
+            gc_file = pjoin(".git","gc.txt")
+            if os.path.isfile(gc_file):
+                sexe("git prune")
+                os.remove(gc_file)
+            cmd = "git svn fetch"      
+            cmd += fetch_range
+            sexe(cmd)
 
 def git_svn_rev_to_sha_map(src_dir):
     "returns a map from svn rev to git sha for a git svn repo at src_dir"
@@ -264,11 +290,16 @@ def git_svn_rev_to_sha_map(src_dir):
         save_json("svn_rev_to_sha_map",res)
         return res
 
-def git_svn_check_clone():
+def git_svn_check_clone(rev = None):
     rcode = 1
+    fetch_range = ""
+    if not rev is None:
+       fetch_range = " -%s:HEAD " % rev
     if os.path.isdir("src"):
         with cchdir("src"):
-            rcode, rout = sexe("git svn fetch", fatal_on_error = False)
+            cmd = "git svn fetch"
+            cmd += fetch_range
+            rcode, rout = sexe(cmd, fatal_on_error = False)
     return rcode == 0
 
 
