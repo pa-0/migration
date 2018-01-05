@@ -6,8 +6,16 @@ import sys
 import os
 import subprocess
 import json
+import datetime
+import glob
+import shutil
 
 from os.path import join as pjoin
+
+script_path =  os.path.split(os.path.abspath(__file__))[0]
+def root_dir():
+    return script_path
+
 
 def sexe(cmd,ret_output=False,echo = True,fatal_on_error=True, env=None):
         """ Helper for executing shell commands. """
@@ -31,10 +39,12 @@ def sexe(cmd,ret_output=False,echo = True,fatal_on_error=True, env=None):
             sys.exit(res[0])
         return res
 
+def split_lines(txt):
+     return [ l for l in txt.split("\n") if l.strip() != ""]
 
 class cchdir():
     def __init__(self, dirname):
-        self.dirnane = dirname
+        self.dirname = dirname
         self.oldwd =  os.getcwd()
 
     def __enter__(self):
@@ -45,8 +55,16 @@ class cchdir():
     def __exit__(self, *args):
         os.chdir(self.oldwd)
 
-def timestamp():
-    return str(datetime.datetime.now())
+def timenow():
+    return datetime.datetime.now()
+    
+def timestamp(t=None,sep="_"):
+    """ Creates a timestamp that can easily be included in a filename. """
+    if t is None:
+        t = timenow()    
+    sargs = (t.year,t.month,t.day,t.hour,t.minute,t.second)
+    sbase = "".join(["%04d",sep,"%02d",sep,"%02d",sep,"%02d",sep,"%02d",sep,"%02d"])
+    return sbase % sargs
 
 def read_json(name):
     fname = "info_" + name + ".json"
@@ -57,3 +75,15 @@ def read_json(name):
 def save_json(name,data):
     json.dump(data,open("info_" + name + ".json","w"))
     return data
+
+def clear_json_files():
+    fs = glob.glob("info*.json")
+    if len(fs) == 0:
+        print "no info*.json files found"
+        return 
+    des_dir = "_info_%s" % timestamp()
+    print "moving json files to %s" % des_dir
+    os.mkdir(des_dir)
+    for f in fs:
+        shutil.move(f,des_dir)
+
