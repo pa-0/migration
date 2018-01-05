@@ -9,12 +9,7 @@ import json
 from svn_utils import *
 
 # Current gaps:
-# warning: uncovered authors:
-# [
-#   "alexanda"
-# ]
-#  from nersc: David Alexander
-# 
+#
 # warning: authors missing email:
 # [
 #   "sidshank",  # sci email?
@@ -202,7 +197,7 @@ def uname_info():
                   "afil" : "NCSA, University of Illinois",
                   "email": "sisneros@illinois.edu"},
     #
-    "knolla":  {"name" : "Aaron Knoll",
+    "knolla":  {"name" : "Aaron Knoll", 
                 "afil" : "SCI Institute, University of Utah",
                 "email": "knolla@sci.utah.edu "},
     #
@@ -235,13 +230,17 @@ def uname_info():
                  "afil" : "Tech-X Corp",
                  "email": "pletzer@txcorp.com"},
     #
+    "alexanda": {"name" : "David Alexander",
+                 "afil" : "Tech-X Corp",
+                 "email": "alexanda@txcorp.com"},
+    #
     "gmorris2": {"name" : "Garrett Morrison",
                  "afil" : "University of Oregon",
                  "email": "gmorriso@cs.uoregon.edu"},
     #
     "kdawes":   {"name" : "Kirsten Dawes",
                  "afil" : "University of Oregon",
-                 "email": "TODO"},
+                 "email": "kdawes@cs.uoregon.edu"},
     #
     "hota":   {"name" : "Alok Hota",
                 "afil" : "University of Tennessee",
@@ -296,7 +295,7 @@ if __name__ == "__main__":
         print "warning: uncovered authors:"
         print json.dumps(ua,indent=2)
     me = authors_missing_email()
-    if len(ua) > 0:
+    if len(me) > 0:
         print "warning: authors missing email:"
         print json.dumps(me,indent=2)
 
