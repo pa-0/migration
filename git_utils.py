@@ -161,8 +161,7 @@ def git_merge_release_to_master_and_tag(tag):
             sys.exit(-1)
         elif rcode != 0:
             # checkout 'thiers' to resolve final conflicts
-            git_conflicts_checkout_and_add_theirs()
-        # TODO: add --author="John Doe <john@doe.com>"         
+            git_conflicts_checkout_and_add_theirs()     
         sexe('git commit -m "%s release"' % tag)
         sexe('git tag -a v%s -m "tag r%s"' % (tag,tag))
 

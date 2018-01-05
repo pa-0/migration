@@ -27,13 +27,21 @@ def git_graft():
            git_create_branch_for_tag_release(release)
            git_merge_release_to_master_and_tag(release)
 
-#git_graft()
-rcs = svn_ls_rc_branches()
-for rc in rcs:
-    for release in svn_release_tags_for_rc(rc):
-        git_create_branch_for_tag_release(release)
-        git_merge_release_to_master_and_tag(release)
+if __name__ == "__main__":
+    git_graft()
 
+#git_graft()
+#rcs = svn_ls_rc_branches()
+#for rc in rcs:
+#    for release in svn_release_tags_for_rc(rc):
+#        git_create_branch_for_tag_release(release)
+#        git_merge_release_to_master_and_tag(release)
+
+
+#git_create_rc_branch("2.13RC")
+#for release in svn_release_tags_for_rc("2.2RC"):
+#    git_create_branch_for_tag_release(release)
+#    git_merge_release_to_master_and_tag(release)
 
 
 # create each release on master

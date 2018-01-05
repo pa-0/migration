@@ -33,5 +33,8 @@ def git_svn_clone_all():
     for b in branches:
         git_svn_clone(b)
 
-git_svn_clone("2.11RC")
+#git_svn_clone("2.11RC")
+
+if __name__ == "__main__":
+    git_svn_clone_all()
 

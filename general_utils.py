@@ -49,10 +49,13 @@ class cchdir():
 
     def __enter__(self):
         if not os.path.isdir(self.dirname):
+            print "[creating directory %s]" % self.dirname
             os.makedirs(self.dirname)
+        print "[changing working directory to %s]" % self.dirname
         os.chdir(self.dirname)
 
     def __exit__(self, *args):
+        print "[changing working directory to %s]" % self.oldwd
         os.chdir(self.oldwd)
 
 def timenow():
