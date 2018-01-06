@@ -8,16 +8,6 @@ import json
 
 from svn_utils import *
 
-# Current gaps:
-#
-# warning: authors missing email:
-# [
-#   "sidshank",  # sci email?
-#   "pascal", # sci email?
-#   "mblair", # llnl email?
-#   "brownlee", # sci email?
-# ]
-
 # details pulled from:  src/svn_bin/nersc_username_to_email
 def uname_info():
     r = {
@@ -186,7 +176,7 @@ def uname_info():
     #
     "mblair":  {"name" : "Mark Blair",
                  "afil" : "Lawrence Livermore National Laboratory",
-                 "email": "TODO"},
+                 "email": "mblair@llnl.gov"},
     #
     "prabhat":  {"name" : "Prabhat",
                  "afil" : "Lawrence Berkeley National Laboratory",
@@ -202,11 +192,11 @@ def uname_info():
     #
     "pascal":  {"name" : "Pascal Grosset",
                 "afil" : "SCI Institute, University of Utah",
-                "email": "TODO"},
+                "email": "pgrosset@sci.utah.edu"},
     #
     "brownlee":  {"name" : "Carson Brownlee",
                 "afil" : "SCI Institute, University of Utah",
-                "email": "TODO"},
+                "email": "brownlee@cs.utah.edu"},
     #
     "garth":  {"name" : "Christoph Garth",
                 "afil" : "UC Davis",
@@ -239,7 +229,7 @@ def uname_info():
     #
     "kdawes":   {"name" : "Kirsten Dawes",
                  "afil" : "University of Oregon",
-                 "email": "kdawes@cs.uoregon.edu"},
+                 "email": "kdawes@uoregon.edu"},
     #
     "hota":   {"name" : "Alok Hota",
                 "afil" : "University of Tennessee",
@@ -255,7 +245,7 @@ def uname_info():
     #
     "sidshank": {"name" : "Siddharth Shankar",
                  "afil" : "SCI Institute, University of Utah",
-                 "email": "TODO"},
+                 "email": "sshankar@cs.utah.edu"},
     #
     "jcanders": {"name" : "John C. Anderson",
                  "afil" : "UC Davis & Lawrence Livermore National Laboratory",
