@@ -1,36 +1,30 @@
 # migration
 Scripts for VisIt's SVN to Github Migration
 
-To craft a new set of git repos, we: 
+## Creating new visit-src git repo
 
-## Obtain metadata from svn repo (records of authors, tags, etc)
+To craft a new git repos that provides VisIt's source developer and release history, we: 
+
+### Obtain metadata from svn repo (records of authors, tags, etc)
 
 ```bash
 python svn_fetch_info.py
 ```
 
-## Obtain trunk and svn RC branches using git svn
+### Obtain trunk and svn RC branches using git svn
 
-This takes quite while due to the size of our repo, ssh disconnects, and failed git prune operations.
-Will automate soon to resume and perserve through known failure modes. 
+This takes quite while due to the size of our svn repo, ssh disconnects, failed git prune operations, etc.
+
+You should be able to keep running the following script iteratively until everything succeeds. 
 
 ```bash
-   mkdir -p checkouts/svn_trunk
-   cd checkouts/svn_trunk
-   git svn clone svn+ssh://{user}@edison.nersc.gov/project/projectdirs/visit/svn/visit/trunk/src
-   cd ../../
+python svn_git_clone_branches.py
 ```
 
-```bash
-   mkdir -p checkouts/svn_2.0RC
-   cd checkouts/svn_2.0RC
-   git svn clone svn+ssh://{user}@edison.nersc.gov/project/projectdirs/visit/svn/visit/branches/2.0RC/src
-````
-
-We alos need to resolve svn author mappings, see `nersc_uname_info.py`
+Note: We have a few email address that we need to resolve for svn author mappings, see `nersc_uname_info.py`
 
 
-## Construct a git repo that grafts our old release structure into a gitflow structure
+### Construct a git repo that grafts our old release structure into a gitflow structure
 
 ```bash
 python git_graft.py
@@ -47,9 +41,18 @@ python git_graft.py
     are related to symlinks, and can easily be resolved with automated `git checkout --thiers` arm-twisting. 
       
      * For each release on the RC:
+       * Tag the start and ending commits for the release on the RC
        * Create a branch (rX.Y.Z) that includes proper subset of RC commits for the release
        * Squash merge this into a  single commit on master 
          
          Note: We encounter the same merge issues related to symlinks in this squash process and we can resolve them the same way.
 
        * Tag the new master commit with vX.Y.Z
+
+
+##  TODOS and future scripts
+
+* Extend scripts to pull out data, test, and other history from svn
+* Create script to obtain all unique TPL tarballs from SVN (we will host outside of git)
+
+
