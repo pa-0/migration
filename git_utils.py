@@ -75,7 +75,11 @@ def git_ls_conflicts():
     res = []
     unmerged = False
     for l in lines:
-        if unmerged:
+        if l.count("renamed") > 0 :
+            f = l.split(":")[1].strip()
+            f = f.split(" ")[0].strip()
+            res.append(f)
+        if unmerged and l.count(":") > 0:
             res.append(l.split(":")[1].strip())
         elif l.count("to mark resolution)") > 0:
            unmerged = True

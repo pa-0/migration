@@ -250,7 +250,7 @@ def svn_check_rc_git_svn_repos():
 
 def git_svn_clone_src(subpath,rev=None):
     "git svn clone 'src' for any subpath"
-    fetch_range = ""
+    fetch_range = " "
     if not rev is None:
        fetch_range = " -%s:HEAD " % rev
     print fetch_range
