@@ -4,6 +4,7 @@
 
 import glob
 import shutil
+import datetime
 
 from os.path import join as pjoin
 
@@ -60,6 +61,78 @@ def git_svn_rc_branch_sha_info(rc):
 
 def git_repo_dir():
     return pjoin(root_dir(),"git_repo","visit-src")
+
+def git_ls_commits():
+    rcode, rout = sexe("git log",ret_output=True)
+    res = []
+    c = {}
+    msg = ""
+    for l in rout.split("\n"):
+        if l.startswith("commit "):
+            if msg != "":
+                c["message"] = msg
+                res.append(dict(c))
+            c = {}
+            msg =""
+            c["sha"] = l.split(" ")[1]
+        elif l.startswith("Author: "):
+            c["author"] = l[len("Author: "):].strip()
+        elif l.startswith("Date: "):
+            c["date"] = l[len("Date: "):].strip()
+        else:
+            msg += l
+    c["message"] = msg
+    res.append(dict(c))
+    return res
+
+
+def git_ls_clearquest_commits():
+    cmts = git_ls_commits()
+    res = []
+    for c in cmts:
+        if c["author"] == "Hank Childs <hank@uoregon.edu>":
+            if c["message"].count(" Update from ") > 0:
+                res.append(c)
+            elif c["message"].count(" Initial repo entry ") > 0:
+                res.append(c)
+        if c["author"] == "Cyrus Harrison <cyrush@llnl.gov>":
+            if c["message"].count("initialize repo") > 0:
+                res.append(c)
+    return res
+
+def visit_clearquest_date_to_git_date(cmt):
+    # finds the clearquest commit date from our svn commit message
+    # and turns it to the proper date string for a git commit
+    if cmt["message"].count("initialize repo") > 0:
+        cq_date = "June 1, 2003"
+    else:
+        cq_date = cmt["message"][cmt["message"].find(" Update from ") + len(" Update from "):]
+        cq_date = cq_date[:cq_date.find("git-svn-id")].strip()
+        if cq_date == "repo entry":
+            cq_date = "June 1, 2003"
+    dt = datetime.datetime.strptime(cq_date, '%B %d, %Y')
+    res = dt.strftime('%a %b %d %H:%M:%S %Y') + " -0700"
+    return res
+
+def git_write_clearquest_commit_date_filter():
+    cmd = "git filter-branch -f --env-filter \\\n"
+    cmd += "'"
+    for cmt in git_ls_clearquest_commits():
+        ndate = visit_clearquest_date_to_git_date(cmt)
+        cmd += git_gen_commit_filter_case(cmt["sha"],ndate)
+    cmd += "'\n"
+    open("sh_git_fix_clearquest_commit_dates.sh","w").write(cmd)
+
+    
+def git_gen_commit_filter_case(sha,ndate):
+    return """
+    if [ $GIT_COMMIT = %s ]
+     then
+         export GIT_AUTHOR_DATE="%s"
+         export GIT_COMMITTER_DATE="%s"
+    fi
+    """ % (sha,ndate,ndate)
+
 
 def git_ls_branches():
     rcode, rout = sexe("git branch",ret_output=True)
