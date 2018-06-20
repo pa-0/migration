@@ -12,6 +12,9 @@ from general_utils import *
 from svn_utils import *
 
 
+def datetime_to_git_date_format(dt):
+    return dt.strftime('%a %b %d %H:%M:%S %Y')
+
 def git_add_remote(name,path):
     "adds a git remote, so we can use it to obtain branches"
     sexe("git remote add %s %s/.git" % (name,path))
@@ -111,8 +114,7 @@ def visit_clearquest_date_to_git_date(cmt):
         if cq_date == "repo entry":
             cq_date = "June 1, 2003"
     dt = datetime.datetime.strptime(cq_date, '%B %d, %Y')
-    res = dt.strftime('%a %b %d %H:%M:%S %Y') + " -0700"
-    return res
+    return datetime_to_git_date_format(dt) + " -0700"
 
 def git_write_clearquest_commit_date_filter():
     cmd = "git filter-branch -f --env-filter \\\n"
@@ -228,6 +230,15 @@ def git_create_branch_for_tag_release(tag):
         sexe("git merge %s" % sha_end)
 
 
+def svn_date_to_git_date(svn_date):
+    #ex = '2010-08-04 07:20:43 -0700 (Wed, 04 Aug 2010)'
+    svn_date = svn_date[:svn_date.find("(")].strip()
+    utc_offset = svn_date[svn_date.rfind(" "):]
+    svn_date = svn_date[:svn_date.rfind(" ")]
+    dt = datetime.datetime.strptime(svn_date, '%Y-%m-%d %H:%M:%S')
+    return datetime_to_git_date_format(dt) + utc_offset
+
+
 def git_merge_release_to_master_and_tag(tag):
     with cchdir(git_repo_dir()):
         sexe("git checkout master")
@@ -238,9 +249,11 @@ def git_merge_release_to_master_and_tag(tag):
             sys.exit(-1)
         elif rcode != 0:
             # checkout 'thiers' to resolve final conflicts
-            git_conflicts_checkout_and_add_theirs()     
+            git_conflicts_checkout_and_add_theirs()
         sexe('git commit -m "%s release"' % tag)
-        sexe('git tag -a v%s -m "tag r%s"' % (tag,tag))
+        tag_info = svn_tag_info(tag)
+        tag_date = svn_date_to_git_date(tag_info["date"])
+        sexe('GIT_AUTHOR_DATE="%s" GIT_COMMITTER_DATE="%s" git tag -a v%s -m "tag r%s"' % (tag_date,tag_date,tag,tag))
 
 
 
