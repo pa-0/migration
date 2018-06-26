@@ -248,7 +248,7 @@ def svn_check_rc_git_svn_repos():
     return ok
 
 
-def git_svn_clone_src(subpath,rev=None):
+def git_svn_clone_src_old(subpath,rev=None):
     "git svn clone 'src' for any subpath"
     fetch_range = " "
     if not rev is None:
@@ -261,7 +261,7 @@ def git_svn_clone_src(subpath,rev=None):
         cmd += pjoin(visit_svn_url(),subpath,"src")
         sexe(cmd)
     else:
-        with chdir("src"):
+        with cchdir("src"):
             # check for gc file, prune case
             gc_file = pjoin(".git","gc.txt")
             if os.path.isfile(gc_file):
@@ -270,6 +270,32 @@ def git_svn_clone_src(subpath,rev=None):
             cmd = "git svn fetch"      
             cmd += fetch_range
             sexe(cmd)
+
+def git_svn_clone_src(subpath,rev=None):
+    "git svn clone 'src' for any subpath"
+    fetch_range = " "
+    if not rev is None:
+       fetch_range = " -%s:HEAD " % rev
+    print fetch_range
+    subpath_final = os.path.split(subpath)[-1]
+    if not os.path.isdir(subpath_final):
+        authors_txt = pjoin(root_dir(),"info_nersc_authors.txt")
+        cmd = "git svn clone --authors-file=%s" % authors_txt
+        cmd += fetch_range
+        cmd += '--ignore-paths="releases|svninfo|third_party|vendor_branches|windowsbuild" '
+        cmd += pjoin(visit_svn_url(),subpath)
+        sexe(cmd)
+    else:
+        with cchdir(subpath_final):
+            # check for gc file, prune case
+            gc_file = pjoin(".git","gc.txt")
+            if os.path.isfile(gc_file):
+                sexe("git prune")
+                os.remove(gc_file)
+            cmd = "git svn fetch"
+            cmd += fetch_range
+            sexe(cmd)
+
 
 def git_svn_rev_to_sha_map(src_dir):
     "returns a map from svn rev to git sha for a git svn repo at src_dir"
