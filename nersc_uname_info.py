@@ -254,6 +254,10 @@ def uname_info():
     "deines": {"name" : "Eduard Deines",
                  "afil" : "UC Davis",
                  "email": "edeines@ucdavis.edu"},
+    #
+    "rusu1": {"name" : "Edward Rusu",
+                 "afil" : "Lawrence Livermore National Laboratory",
+                 "email": "rusu1@llnl.gov"},
     }
     return r
 

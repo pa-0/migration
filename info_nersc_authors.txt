@@ -1,6 +1,7 @@
 sveta = Svetlana Shasharina <sveta@txcorp.com>
 miller86 = Mark Miller <miller86@llnl.gov>
 selby = Paul Selby <paul.selby@awe.co.uk>
+rusu1 = Edward Rusu <rusu1@llnl.gov>
 jimeliot = Jim Eliot <jim.eliot@awe.co.uk>
 gmorris2 = Garrett Morrison <gmorriso@cs.uoregon.edu>
 pugmire = Dave Pugmire <pugmire@ornl.gov>
