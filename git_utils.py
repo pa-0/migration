@@ -17,6 +17,9 @@ def datetime_to_git_date_format(dt):
 
 def git_add_remote(name,path):
     "adds a git remote, so we can use it to obtain branches"
+    if not os.path.isdir(pjoin(path,".git")):
+         print "[ERROR ADDING REMOTE: %s does not have a .git dir]" % path
+         sys.exit(-1)
     sexe("git remote add %s %s/.git" % (name,path))
 
 def git_svn_find_closest_rev(src_dir,rev):
@@ -54,8 +57,8 @@ def git_svn_tag_sha_range(tag):
 
 def git_svn_rc_branch_sha_info(rc):
     rc_rev  = svn_rc_creation_map()[rc]
-    rc_trunk_root = git_svn_find_closest_rev("checkouts/svn_trunk/src",rc_rev)
-    sha = git_svn_rev_to_sha_map("checkouts/svn_trunk/src")[rc_trunk_root]
+    rc_trunk_root = git_svn_find_closest_rev("checkouts/svn_trunk/trunk/",rc_rev)
+    sha = git_svn_rev_to_sha_map("checkouts/svn_trunk/trunk")[rc_trunk_root]
     print rc
     print "rc creation rev:", rc_rev
     print "closest trunk rev,sha:", rc_trunk_root,sha
@@ -180,7 +183,8 @@ def git_setup_new_repo():
 def git_connect_git_svn_remotes():
     with cchdir(git_repo_dir()):
         for k,v in svn_git_svn_checkout_dirs().items():
-            path = pjoin(v,"src")
+            # strip off svn_
+            path = pjoin(v,k[4:])
             print "[adding remote: %s (%s)]" % (k,path)
             git_add_remote(k,path)
 

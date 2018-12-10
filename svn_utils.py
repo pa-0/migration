@@ -301,6 +301,7 @@ def git_svn_rev_to_sha_map(src_dir):
     "returns a map from svn rev to git sha for a git svn repo at src_dir"
     if not os.path.isdir(src_dir):
         print "BAD SRC DIR: %s" % src_dir
+        sys.exit(-1)
         return None
     with cchdir(src_dir):
         r = read_json("svn_rev_to_sha_map")
@@ -330,7 +331,7 @@ def git_svn_check_clone(rev = None):
 
 
 def git_svn_rc_checkout_dir(rc):
-    return pjoin(root_dir(),"checkouts","svn_" + rc,"src")
+    return pjoin(root_dir(),"checkouts","svn_" + rc,rc)
 
 
 
