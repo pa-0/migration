@@ -11,21 +11,40 @@ from general_utils import *
 from svn_utils import *
 from git_utils import *
 
-def git_graft():
+
+def git_graft_initial_setup():
+    print "[checking rc git svn repos]"
     svn_check_rc_git_svn_repos()
-    rcs = svn_ls_rc_branches()
+    print "[setting up new git repo]"
     git_setup_new_repo()
+    print "[connecting git svn remotes]"
     git_connect_git_svn_remotes()
+
+def git_graft_setup_develop():
+    print "[setting up git develop branch]"
     git_setup_develop()
+
+def git_graft_create_rc_branches():
     # for each rc, create rc branch
+    rcs = svn_ls_rc_branches()
     for rc in rcs:
         if os.path.isdir( git_svn_rc_checkout_dir(rc)):
+            print "[creating rc branch %s]" % rc
             git_create_rc_branch(rc)
+
+def git_graft_tag_releases():
     # for each release, create squashed commit to master
+    rcs = svn_ls_rc_branches()
     for rc in rcs:
+      print "[tagging releases off off rc %s]" % rc
       for release in svn_release_tags_for_rc(rc):
+           print "[tagging release %s]" % release
            git_create_branch_for_tag_release(release)
            git_merge_release_to_master_and_tag(release)
+
+def git_graft():
+    git_graft_initial_setup()
+    git_graft_setup_develop()
 
 if __name__ == "__main__":
     git_graft()

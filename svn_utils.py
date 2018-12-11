@@ -254,20 +254,22 @@ def git_svn_clone_src(subpath,rev=None):
     if not rev is None:
        fetch_range = " -%s:HEAD " % rev
     print fetch_range
-    if not os.path.isdir("src"):
+    subpath_final = os.path.split(subpath)[-1]
+    if not os.path.isdir(subpath_final):
         authors_txt = pjoin(root_dir(),"info_nersc_authors.txt")
         cmd = "git svn clone --authors-file=%s" % authors_txt
         cmd += fetch_range
-        cmd += pjoin(visit_svn_url(),subpath,"src")
+        cmd += '--ignore-paths="releases|svninfo|third_party|vendor_branches|windowsbuild" '
+        cmd += pjoin(visit_svn_url(),subpath)
         sexe(cmd)
     else:
-        with chdir("src"):
+        with chdir(subpath_final):
             # check for gc file, prune case
             gc_file = pjoin(".git","gc.txt")
             if os.path.isfile(gc_file):
                 sexe("git prune")
                 os.remove(gc_file)
-            cmd = "git svn fetch"      
+            cmd = "git svn fetch"
             cmd += fetch_range
             sexe(cmd)
 
