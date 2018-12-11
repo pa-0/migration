@@ -5,7 +5,7 @@
 #SBATCH -A wbronze
 #SBATCH -o m.out.svn_git_clone_all.txt
 date
-cd /Users/harrison37/Work/visit-dav/migration
+cd  /usr/workspace/wsa/cyrush/2018.06.visit.svn.migrate/migration
 python svn_git_clone_branches.py
 date
 
