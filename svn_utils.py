@@ -342,6 +342,48 @@ def git_svn_check_clone(rev = None):
     return rcode == 0
 
 
+def git_svn_subdir_path(path):
+    # from checkout root, the subdir path will
+    # mirror the last path name but with "svn_" stripped off
+    # the front
+    subpath = os.path.split(os.path.abspath(path))[-1]
+    subpath = subpath[4:]
+    return pjoin(path,subpath)
+
+
+def git_svn_update_clone(rev = None):
+    rcode =1
+    fetch_range = ""
+    if not rev is None:
+       fetch_range = " -%s:HEAD " % rev
+    repo_path = git_svn_subdir_path(os.getcwd())
+    print "[checking path %s] " % repo_path
+    if os.path.isdir(repo_path):
+        print "[found %s]" % repo_path
+        with cchdir(repo_path):
+            print "[fetching new commits for %s]" % repo_path 
+            cmd = "git svn fetch"
+            cmd += fetch_range
+            rcode, rout = sexe(cmd, fatal_on_error = False)
+            if rcode != 0:
+                return False
+            rcode, rout = sexe("git svn rebase")
+    else:
+        print "[ERROR: can't update b/c path %s missing is]" % repo_path
+        sys.exit(-1)
+    return rcode == 0
+
+
+def git_svn_check_if_clone_exists(path):
+    repo_path = git_svn_subdir_path(path)
+    print "[checking if clone exists at path %s] " % repo_path
+    if os.path.isdir(repo_path):
+        return True
+    else:
+        return False
+
+
+
 def git_svn_rc_checkout_dir(rc):
     return pjoin(root_dir(),"checkouts","svn_" + rc,rc)
 
