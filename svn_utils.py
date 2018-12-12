@@ -278,7 +278,6 @@ def git_svn_clone_src(subpath,rev=None):
     fetch_range = " "
     if not rev is None:
        fetch_range = " -%s:HEAD " % rev
-    print fetch_range
     subpath_final = os.path.split(subpath)[-1]
     if not os.path.isdir(subpath_final):
         authors_txt = pjoin(root_dir(),"info_nersc_authors.txt")
@@ -319,16 +318,27 @@ def git_svn_rev_to_sha_map(src_dir):
         save_json("svn_rev_to_sha_map",res)
         return res
 
+
 def git_svn_check_clone(rev = None):
     rcode = 1
     fetch_range = ""
     if not rev is None:
        fetch_range = " -%s:HEAD " % rev
-    if os.path.isdir("src"):
-        with cchdir("src"):
+    subpath = os.getcwd()
+    subpath = os.path.split(subpath)[-1]
+    subpath = subpath[4:]
+    print "[checking path %s] " % subpath
+    repo_path = pjoin(os.getcwd(),subpath)
+    if os.path.isdir(repo_path):
+        print "[found %s]" % repo_path
+        with cchdir(repo_path):
+            print "[fetching new commits for %s]" % repo_path 
             cmd = "git svn fetch"
             cmd += fetch_range
             rcode, rout = sexe(cmd, fatal_on_error = False)
+            if rcode != 0:
+                return False
+            rcode, rout = sexe("git svn rebase")
     return rcode == 0
 
 
