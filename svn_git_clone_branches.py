@@ -28,13 +28,13 @@ from svn_utils import *
 #             print "[git svn clone at %s is up to date]" % dest
 
 def git_svn_clone(branch):
+    dest = pjoin(root_dir(),"checkouts","svn_%s" % branch)
+    rc_start_revs = svn_rc_creation_map()
     rev_str = None
     if branch != "trunk":
         rev_id = SVNRev(rc_start_revs[branch])
         # start looking one rev before ...
         rev_str = "r%d" % (rev_id.number()-1)
-    dest = pjoin(root_dir(),"checkouts","svn_%s" % branch)
-    rc_start_revs = svn_rc_creation_map()
     if not git_svn_check_if_clone_exists(dest):
         print "[cloning to %s]" % dest
         with cchdir(dest):
@@ -47,7 +47,7 @@ def git_svn_clone(branch):
     else:
         print "[updating %s]" % dest
         with cchdir(dest):
-            git_svn_update_clone(rev_str):
+            git_svn_update_clone(rev_str)
 
 
 def git_svn_clone_all():
