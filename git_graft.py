@@ -32,21 +32,30 @@ def git_graft_create_rc_branches():
             print "[creating rc branch %s]" % rc
             git_create_rc_branch(rc)
 
+def generate_rc_branch_patches():
+    # for each rc gen a patch with all of their commits
+    rcs = svn_ls_rc_branches()
+    for rc in rcs:
+      print "[generating rc branch patch for %s]" % rc
+      git_generate_rc_branch_patch(rc)
+
 def git_graft_tag_releases():
     # for each release, create squashed commit to master
     rcs = svn_ls_rc_branches()
     for rc in rcs:
-      print "[tagging releases off off rc %s]" % rc
+      print "[tagging releases off of rc %s]" % rc
       for release in svn_release_tags_for_rc(rc):
            print "[tagging release %s]" % release
            git_create_branch_for_tag_release(release)
            git_merge_release_to_master_and_tag(release)
 
 def git_graft():
+    #generate_rc_branch_patches()
     #git_graft_initial_setup()
     #git_graft_setup_develop()
     #git_graft_create_rc_branches()
-    git_graft_tag_releases()
+    #git_create_rc_branch("2.0RC")
+    #git_graft_tag_releases()
 
 if __name__ == "__main__":
     git_graft()

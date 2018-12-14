@@ -200,6 +200,16 @@ def git_setup_develop():
         sexe("git checkout -b develop")
         sexe('git merge -m "merge svn trunk as git develop" svn_trunk/master')
 
+def git_generate_rc_branch_patch(rc):
+    with cchdir(pjoin("checkouts","svn_%s" % rc,"%s" % rc)):
+         cs = git_ls_commits()
+         num_commits = len(cs)
+         # first commit is always the svn copy, which is huge
+         # and we don't need a patch for it 
+         patch_commits = num_commits -1
+         cmd = "git format-patch -%d --stdout > pgen_%s.patch" % (patch_commits,rc)
+         sexe(cmd)
+
 def git_create_rc_branch(rc):
     # find the sha that corresponds to the proper trunk rev
     rc_rev, rc_trunk_rev, sha = git_svn_rc_branch_sha_info(rc)
@@ -210,14 +220,18 @@ def git_create_rc_branch(rc):
         sexe("git checkout develop")
         sexe("git checkout -b %s %s" % (rc,sha))
         # merge svn RC commits into new rc branch
+        sys.exit(-1)
         merge_msg = "merge svn branch as git %s branch" % rc
         # we may actually have conflicts
-        rcode,rout = sexe('git merge -X theirs -m "%s" svn_%s/master' % (merge_msg,rc),fatal_on_error=False)
+        rcode,rout = sexe('git merge -m "%s" svn_%s/master' % (merge_msg,rc),fatal_on_error=False)
+        #rcode,rout = sexe('git merge -X theirs -m "%s" svn_%s/master' % (merge_msg,rc),fatal_on_error=False)
         # check if conflicts were the reason we failed
         if rcode != 0 and len(git_ls_conflicts()) == 0:
             print "[UNKNOWN ERROR with merge -- stopping]"
             sys.exit(-1)
         elif rcode != 0:
+            print "[stopping on conflict -- stopping]"
+            sys.exit(-1)
             # checkout 'thiers' to resolve final conflicts
             git_conflicts_checkout_and_add_theirs()
             sexe('git commit -m "%s"' % (merge_msg))
