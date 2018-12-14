@@ -46,7 +46,9 @@ def git_graft():
     #git_graft_initial_setup()
     #git_graft_setup_develop()
     #git_graft_create_rc_branches()
-    git_graft_tag_releases()
+    #git_graft_tag_releases()
+    git_final_cleaup()
+    git_gen_lfs_migrate_script()
 
 if __name__ == "__main__":
     git_graft()

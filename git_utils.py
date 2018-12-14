@@ -17,9 +17,6 @@ def datetime_to_git_date_format(dt):
 
 def git_add_remote(name,path):
     "adds a git remote, so we can use it to obtain branches"
-    if not os.path.isdir(pjoin(path,".git")):
-         print "[ERROR ADDING REMOTE: %s does not have a .git dir]" % path
-         sys.exit(-1)
     sexe("git remote add %s %s/.git" % (name,path))
 
 def git_svn_find_closest_rev(src_dir,rev):
@@ -57,8 +54,8 @@ def git_svn_tag_sha_range(tag):
 
 def git_svn_rc_branch_sha_info(rc):
     rc_rev  = svn_rc_creation_map()[rc]
-    rc_trunk_root = git_svn_find_closest_rev("checkouts/svn_trunk/trunk/",rc_rev)
-    sha = git_svn_rev_to_sha_map("checkouts/svn_trunk/trunk")[rc_trunk_root]
+    rc_trunk_root = git_svn_find_closest_rev("checkouts/svn_trunk/src",rc_rev)
+    sha = git_svn_rev_to_sha_map("checkouts/svn_trunk/src")[rc_trunk_root]
     print rc
     print "rc creation rev:", rc_rev
     print "closest trunk rev,sha:", rc_trunk_root,sha
@@ -138,10 +135,61 @@ def git_gen_commit_filter_case(sha,ndate):
     fi
     """ % (sha,ndate,ndate)
 
+def git_cleanup_fix_clearquest_commit_dates():
+    git_write_clearquest_commit_date_filter()
+    sexe("sh_git_fix_clearquest_commit_dates.sh")
+
+def git_cleanup_remove_rtags():
+    tags = git_ls_tags()
+    for tag in tags:
+        print tag
+        if tag.startswith("r") and tag.count(".") == 4:
+            git_delete_tag(tag)
+
+def git_cleanup_remove_rbranches():
+    branches = git_ls_branches()
+    for branch in branches:
+        print branch
+        if branch.startswith("r") and branch.count(".") == 2:
+            git_delete_branch(branch)
+
+def git_cleanup_remove_svn_remotes():
+    remotes = git_ls_remotes()
+    for remote in remotes:
+        if remote.startswith("svn_"):
+            git_remove_remote(remote)
+
+
+def git_final_cleaup():
+    with cchdir(git_repo_dir()):
+        # may sure we are on develop, we dont' want
+        # errors related to deling branches we are on
+        sexe("git checkout develop")
+        # fix cq dates
+        # git_cleanup_fix_clearquest_commit_dates()
+        # remove "begin" and "end" tags
+        git_cleanup_remove_rtags()
+        # remove r-branches
+        git_cleanup_remove_rbranches()
+        # remove svn remotes
+        git_cleanup_remove_svn_remotes()
+        # run git gc to cleanup
+        #git_gc()
+
+
+
+def git_gc():
+    print "[running git garbage collection]"
+    rcode, rout = sexe("git gc")
 
 def git_ls_branches():
     rcode, rout = sexe("git branch",ret_output=True)
-    remotes = [ l[:1].strip() for l in rout.split("\n") if l.strip() != ""]
+    res = [ l.split()[-1] for l in split_lines(rout)]
+    return res
+
+def git_ls_tags():
+    rcode, rout = sexe("git tag",ret_output=True)
+    return split_lines(rout)
 
 def git_ls_remotes():
     rcode, rout = sexe("git remote",ret_output=True)
@@ -163,6 +211,19 @@ def git_ls_conflicts():
            unmerged = True
     return res
 
+def git_delete_tag(tag):
+    print "[deleting tag %s]" % tag
+    rcode, rout = sexe("git tag --delete %s" % tag)
+
+def git_delete_branch(branch):
+    print "[deleting branch %s]" % branch
+    rcode, rout = sexe("git branch -D %s" % branch)
+
+
+def git_remove_remote(remote):
+    print "[removing remote %s]" % remote
+    rcode, rout = sexe("git remote rm %s" % remote)
+
 def git_conflicts_checkout_and_add_theirs():
     cfiles = git_ls_conflicts()
     for cfile in cfiles:
@@ -183,8 +244,7 @@ def git_setup_new_repo():
 def git_connect_git_svn_remotes():
     with cchdir(git_repo_dir()):
         for k,v in svn_git_svn_checkout_dirs().items():
-            # strip off svn_
-            path = pjoin(v,k[4:])
+            path = pjoin(v,"src")
             print "[adding remote: %s (%s)]" % (k,path)
             git_add_remote(k,path)
 
@@ -259,6 +319,44 @@ def git_merge_release_to_master_and_tag(tag):
         tag_date = svn_date_to_git_date(tag_info["date"])
         sexe('GIT_AUTHOR_DATE="%s" GIT_COMMITTER_DATE="%s" git tag -a v%s -m "tag r%s"' % (tag_date,tag_date,tag,tag))
 
+
+def git_gen_lfs_migrate_script():
+    with cchdir(git_repo_dir()):
+        cases = ["data/*.h5nimrod",
+             "data/*.pdb",
+             "data/*.data",
+             "docs/*.png",
+             "docs/*.jpg",
+             "docs/*.jpeg",
+             "docs/*.tif",
+             "test/*.tif",
+             "test/*.png",
+             "*.xyz",
+             "*.tar",
+             "*.gz",
+             "*.tgz",
+             "*.7z",
+             "*.zip",
+             "*.bz2",
+             "*.mpeg",
+             "*.mp4",
+             "*.mov",
+             "*.ppt",
+             "*.pptx",
+             "*.pdf",
+             "*.doc",
+             "*.docx",
+             "*.dylib",
+             "*.dll",
+             "*.so"]
+
+        cases_str = ",".join(cases)
+        cmd = 'git lfs migrate import --include="%s" ' % cases_str
+        for branch in git_ls_branches():
+            cmd += " --include-ref=refs/heads/%s" % branch
+        open("sh_git_lfs_migrate.sh","w").write(cmd + "\n")
+    
+    
 
 
 
