@@ -19,7 +19,7 @@ def git_add_remote(name,path):
     "adds a git remote, so we can use it to obtain branches"
     sexe("git remote add %s %s/.git" % (name,path))
 
-def git_svn_find_closest_rev(src_dir,rev):
+def git_svn_find_closest_rev_old(src_dir,rev):
     #print "lookin for %s in %s" % (rev,src_dir)
     rev_map = git_svn_rev_to_sha_map(src_dir)
     # exact match
@@ -38,23 +38,82 @@ def git_svn_find_closest_rev(src_dir,rev):
              return "r%d" % last
     return "r%d" % last
 
+def gen_svn_rev_to_git_commit_map(branch):
+    res = {}
+    with cchdir(git_repo_dir()):
+        sexe("git checkout %s" % branch)
+        cs = git_ls_commits()
+        for c in cs:
+            if c.has_key("svn_rev"):
+                res[c["svn_rev"]] = c
+    return res
+
+def git_find_closest_svn_rev(branch,rev):
+    print "lookin for %s in %s" % (rev,branch)
+    rev_map = gen_svn_rev_to_git_commit_map(branch)
+    # exact match
+    if rev in rev_map.keys():
+        return rev
+    # need to find closest commit before this
+    # revs in this case don't start with r
+    rev = int(rev[1:])
+    revs = rev_map.keys()
+    revs = [ int(r) for r in revs]
+    revs.sort()
+    last = revs[0]
+    for k in revs:
+         if k < rev:
+             last = k
+         else:
+             return "%d" % last
+    return "%d" % last
+
+def git_extract_git_svn_id(c):
+    if c["message"].count("git-svn-id") > 0:
+        gsv = c["message"][c["message"].find("git-svn-id"):]
+        for tok in gsv.split():
+            if tok.count("@") > 0:
+                return tok.split("@")[1]
+    return None
+
+def git_log_fetch_svn_revs():
+    cs = git_ls_commits()
+    for c in cs:
+        rev = git_extract_git_svn_id(c)
+
+
 def git_svn_tag_sha_range(tag):
     rc = svn_tag_to_rc(tag)
     rc_co_dir = git_svn_rc_checkout_dir(rc)
     rc_st, rc_end = svn_tag_range(tag)
 
     
-    rc_root_st  = git_svn_find_closest_rev(rc_co_dir,rc_st)
-    rc_root_end = git_svn_find_closest_rev(rc_co_dir,rc_end)
+    rc_root_st  = git_find_closest_svn_rev(rc_co_dir,rc_st)
+    rc_root_end = git_find_closest_svn_rev(rc_co_dir,rc_end)
     
     sha_st  = git_svn_rev_to_sha_map(rc_co_dir)[rc_root_st]
     sha_end = git_svn_rev_to_sha_map(rc_co_dir)[rc_root_end]
     return sha_st, rc_root_st, sha_end, rc_root_end
 
+def git_find_svn_tag_sha_range(tag):
+    rc = svn_tag_to_rc(tag)
+    #rc_co_dir = git_svn_rc_checkout_dir(rc)
+    rc_st, rc_end = svn_tag_range(tag)
+
+    
+    rc_root_st  = git_find_closest_svn_rev(rc,rc_st)
+    rc_root_end = git_find_closest_svn_rev(rc,rc_end)
+
+    rev_map = gen_svn_rev_to_git_commit_map(rc)
+    
+    sha_st  = rev_map[rc_root_st]["sha"]
+    sha_end = rev_map[rc_root_end]["sha"]
+    return sha_st, rc_root_st, sha_end, rc_root_end
+
 
 def git_svn_rc_branch_sha_info(rc):
     rc_rev  = svn_rc_creation_map()[rc]
-    rc_trunk_root = git_svn_find_closest_rev("checkouts/svn_trunk/src",rc_rev)
+    rc_trunk_root = git_find_closest_svn_rev("checkouts/svn_trunk/src",rc_rev)
     sha = git_svn_rev_to_sha_map("checkouts/svn_trunk/src")[rc_trunk_root]
     print rc
     print "rc creation rev:", rc_rev
@@ -62,8 +121,25 @@ def git_svn_rc_branch_sha_info(rc):
     return rc_rev, rc_trunk_root, sha
 
 
+def git_find_rc_branch_sha_info(rc):
+    rc_rev  = svn_rc_creation_map()[rc]
+    rc_trunk_root = git_find_closest_svn_rev("develop",rc_rev)
+    sha = gen_svn_rev_to_git_commit_map("develop")[rc_trunk_root]["sha"]
+    print rc
+    print "rc creation rev:", rc_rev
+    print "closest trunk rev,sha:", rc_trunk_root,sha
+    return rc_rev, rc_trunk_root, sha
+
 def git_repo_dir():
     return pjoin(root_dir(),"git_repo","visit-src")
+
+def extract_git_svn_rev(msg):
+    if msg.count("git-svn-id") > 0:
+        gsv = msg[msg.find("git-svn-id"):]
+        for tok in gsv.split():
+            if tok.count("@") > 0:
+                return tok.split("@")[1]
+    return None
 
 def git_ls_commits():
     rcode, rout = sexe("git log",ret_output=True)
@@ -74,6 +150,9 @@ def git_ls_commits():
         if l.startswith("commit "):
             if msg != "":
                 c["message"] = msg
+                svn_rev = extract_git_svn_rev(msg)
+                if not svn_rev is None:
+                    c["svn_rev"] = svn_rev
                 res.append(dict(c))
             c = {}
             msg =""
@@ -85,6 +164,9 @@ def git_ls_commits():
         else:
             msg += l
     c["message"] = msg
+    svn_rev = extract_git_svn_rev(msg)
+    if not svn_rev is None:
+        c["svn_rev"] = svn_rev
     res.append(dict(c))
     return res
 
@@ -272,33 +354,37 @@ def git_generate_rc_branch_patch(rc):
 
 def git_create_rc_branch(rc):
     # find the sha that corresponds to the proper trunk rev
-    rc_rev, rc_trunk_rev, sha = git_svn_rc_branch_sha_info(rc)
+    rc_rev, rc_trunk_rev, sha = git_find_rc_branch_sha_info(rc)
     with cchdir(git_repo_dir()):
         # fetch remote with svn RC commits
-        sexe("git fetch svn_%s" % rc)
+        # sexe("git fetch svn_%s" % rc)
         # create rc branch off of develop at proper rev
         sexe("git checkout develop")
         sexe("git checkout -b %s %s" % (rc,sha))
         # merge svn RC commits into new rc branch
-        sys.exit(-1)
-        merge_msg = "merge svn branch as git %s branch" % rc
-        # we may actually have conflicts
-        rcode,rout = sexe('git merge -m "%s" svn_%s/master' % (merge_msg,rc),fatal_on_error=False)
-        #rcode,rout = sexe('git merge -X theirs -m "%s" svn_%s/master' % (merge_msg,rc),fatal_on_error=False)
-        # check if conflicts were the reason we failed
-        if rcode != 0 and len(git_ls_conflicts()) == 0:
-            print "[UNKNOWN ERROR with merge -- stopping]"
-            sys.exit(-1)
-        elif rcode != 0:
-            print "[stopping on conflict -- stopping]"
-            sys.exit(-1)
-            # checkout 'thiers' to resolve final conflicts
-            git_conflicts_checkout_and_add_theirs()
-            sexe('git commit -m "%s"' % (merge_msg))
+        # find the proper patch
+        patch =pjoin(root_dir(),"patches","pgen_%s.patch" % rc)
+        cmd = "git am --ignore-space-change --ignore-whitespace %s" % patch
+        sexe(cmd)
+        # Old magic:
+        # merge_msg = "merge svn branch as git %s branch" % rc
+        # # we may actually have conflicts
+        # rcode,rout = sexe('git merge -m "%s" svn_%s/master' % (merge_msg,rc),fatal_on_error=False)
+        # #rcode,rout = sexe('git merge -X theirs -m "%s" svn_%s/master' % (merge_msg,rc),fatal_on_error=False)
+        # # check if conflicts were the reason we failed
+        # if rcode != 0 and len(git_ls_conflicts()) == 0:
+        #     print "[UNKNOWN ERROR with merge -- stopping]"
+        #     sys.exit(-1)
+        # elif rcode != 0:
+        #     print "[stopping on conflict -- stopping]"
+        #     sys.exit(-1)
+        #     # checkout 'thiers' to resolve final conflicts
+        #     git_conflicts_checkout_and_add_theirs()
+        #     sexe('git commit -m "%s"' % (merge_msg))
   
 def git_create_branch_for_tag_release(tag):
     rc = svn_tag_to_rc(tag)
-    sha_st, rv_st, sha_end, rv_end  = git_svn_tag_sha_range(tag)
+    sha_st, rv_st, sha_end, rv_end  = git_find_svn_tag_sha_range(tag)
     print "[%s tag range on git %s Branch: %s %s (svn revs: %s %s)]" % (tag,rc,sha_st,sha_end, rv_st,rv_end)
     with cchdir(git_repo_dir()):
         sexe("git checkout %s" % rc)

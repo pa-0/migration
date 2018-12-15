@@ -57,6 +57,12 @@ def git_graft():
     #git_graft_tag_releases()
     #git_final_cleaup()
     #git_gen_lfs_migrate_script()
+    #git_create_rc_branch("1.10RC")
+    #git_create_rc_branch("2.0RC")
+    #git_create_rc_branch("2.9RC")
+    for release in svn_release_tags_for_rc("2.9RC"):
+        git_create_branch_for_tag_release(release)
+    #git_merge_release_to_master_and_tag(release)
 
 if __name__ == "__main__":
     git_graft()
