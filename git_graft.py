@@ -28,7 +28,7 @@ def git_graft_create_rc_branches():
     # for each rc, create rc branch
     rcs = svn_ls_rc_branches()
     for rc in rcs:
-        if os.path.isdir( git_svn_rc_checkout_dir(rc)):
+        if not rc.startswith("1.") and os.path.isdir( git_svn_rc_checkout_dir(rc)):
             print "[creating rc branch %s]" % rc
             git_create_rc_branch(rc)
 
@@ -43,25 +43,30 @@ def git_graft_tag_releases():
     # for each release, create squashed commit to master
     rcs = svn_ls_rc_branches()
     for rc in rcs:
-      print "[tagging releases off of rc %s]" % rc
-      for release in svn_release_tags_for_rc(rc):
-           print "[tagging release %s]" % release
-           git_create_branch_for_tag_release(release)
-           git_merge_release_to_master_and_tag(release)
+      if not rc.startswith("1."):
+          print "[tagging releases off of rc %s]" % rc
+          for release in svn_release_tags_for_rc(rc):
+              print "[tagging release %s]" % release
+              git_create_branch_for_tag_release(release)
+              git_merge_release_to_master_and_tag(release)
 
 def git_graft():
+    #
+    #
+    #
+    #git_create_rc_branch("1.12RC")
     #generate_rc_branch_patches()
     #git_graft_initial_setup()
     #git_graft_setup_develop()
     #git_graft_create_rc_branches()
-    #git_graft_tag_releases()
+    git_graft_tag_releases()
     #git_final_cleaup()
     #git_gen_lfs_migrate_script()
     #git_create_rc_branch("1.10RC")
     #git_create_rc_branch("2.0RC")
     #git_create_rc_branch("2.9RC")
-    for release in svn_release_tags_for_rc("2.9RC"):
-        git_create_branch_for_tag_release(release)
+    #for release in svn_release_tags_for_rc("2.9RC"):
+    #    git_create_branch_for_tag_release(release)
     #git_merge_release_to_master_and_tag(release)
 
 if __name__ == "__main__":

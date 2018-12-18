@@ -326,9 +326,10 @@ def git_setup_new_repo():
 def git_connect_git_svn_remotes():
     with cchdir(git_repo_dir()):
         for k,v in svn_git_svn_checkout_dirs().items():
-            path = pjoin(v,"src")
-            print "[adding remote: %s (%s)]" % (k,path)
-            git_add_remote(k,path)
+            path = pjoin(v,"trunk")
+            if k.count("trunk") > 0:
+                print "[adding remote: %s (%s)]" % (k,path)
+                git_add_remote(k,path)
 
 def git_fetch_all_remotes():
     with cchdir(git_repo_dir()):
@@ -365,7 +366,12 @@ def git_create_rc_branch(rc):
         # find the proper patch
         patch =pjoin(root_dir(),"patches","pgen_%s.patch" % rc)
         cmd = "git am --ignore-space-change --ignore-whitespace %s" % patch
-        sexe(cmd)
+        rcode, rout = sexe(cmd,fatal_on_error=False)
+        if rcode != 0:
+            print "[ERROR: GEN OF RC BRANCH %s FROM PATCH FAILED]" % rc
+            sexe("git am --abort")
+            sexe("git checkout develop")
+            sexe("git branch -D %s" %rc )
         # Old magic:
         # merge_msg = "merge svn branch as git %s branch" % rc
         # # we may actually have conflicts
@@ -413,6 +419,7 @@ def git_merge_release_to_master_and_tag(tag):
             sys.exit(-1)
         elif rcode != 0:
             # checkout 'thiers' to resolve final conflicts
+            print "[WARNING RESOLVING CONFLICT WITH MERGE FOR TAG %s]" % tag
             git_conflicts_checkout_and_add_theirs()
         sexe('git commit -m "%s release"' % tag)
         tag_info = svn_tag_info(tag)
