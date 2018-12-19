@@ -48,61 +48,17 @@ def git_graft_tag_releases():
           for release in svn_release_tags_for_rc(rc):
               print "[tagging release %s]" % release
               git_tag_release(release)
-              #git_create_branch_for_tag_release(release)
-              #git_merge_release_to_master_and_tag(release)
 
 def git_graft():
-    #
-    #
-    #
-    #git_create_rc_branch("1.12RC")
     #generate_rc_branch_patches()
-    #git_graft_initial_setup()
-    #git_graft_setup_develop()
-    #git_graft_create_rc_branches()
+    git_graft_initial_setup()
+    git_graft_setup_develop()
+    git_graft_create_rc_branches()
     git_graft_tag_releases()
     #git_final_cleaup()
-    #git_gen_lfs_migrate_script()
-    #git_create_rc_branch("1.10RC")
-    #git_create_rc_branch("2.0RC")
-    #git_create_rc_branch("2.9RC")
-    #for release in svn_release_tags_for_rc("2.9RC"):
-    #    git_create_branch_for_tag_release(release)
-    #git_merge_release_to_master_and_tag(release)
 
 if __name__ == "__main__":
     git_graft()
-
-#git_graft()
-#rcs = svn_ls_rc_branches()
-#for rc in rcs:
-#    for release in svn_release_tags_for_rc(rc):
-#        git_create_branch_for_tag_release(release)
-#        git_merge_release_to_master_and_tag(release)
-
-
-#git_create_rc_branch("2.13RC")
-#for release in svn_release_tags_for_rc("2.2RC"):
-#    git_create_branch_for_tag_release(release)
-#    git_merge_release_to_master_and_tag(release)
-
-
-# create each release on master
-# for each tag, prep a branch off of the rc that will provide a source for us
-# to squash merge to #  master  to do this, we need the commit ranges for the tags
-
-#git_create_rc_branch("2.0RC")
-#git_create_branch_for_tag_release("2.0.0")
-#git_merge_release_to_master_and_tag("2.0.0")
-#git_create_branch_for_tag_release("2.0.2")
-#git_merge_release_to_master_and_tag("2.0.2")
-
-#git_create_rc_branch("2.1RC")
-
-#git_create_branch_for_tag_release("2.1.1")
-#git_merge_release_to_master_and_tag("2.1.1")
-#git_create_branch_for_tag_release("2.1.1")
-#git_merge_release_to_master_and_tag("2.1.1")
 
 
 
