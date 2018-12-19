@@ -47,8 +47,9 @@ def git_graft_tag_releases():
           print "[tagging releases off of rc %s]" % rc
           for release in svn_release_tags_for_rc(rc):
               print "[tagging release %s]" % release
-              git_create_branch_for_tag_release(release)
-              git_merge_release_to_master_and_tag(release)
+              git_tag_release(release)
+              #git_create_branch_for_tag_release(release)
+              #git_merge_release_to_master_and_tag(release)
 
 def git_graft():
     #

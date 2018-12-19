@@ -387,8 +387,24 @@ def git_create_rc_branch(rc):
         #     # checkout 'thiers' to resolve final conflicts
         #     git_conflicts_checkout_and_add_theirs()
         #     sexe('git commit -m "%s"' % (merge_msg))
+
+def git_tag_release(tag):
+    rc = svn_tag_to_rc(tag)
+    sha_st, rv_st, sha_end, rv_end  = git_find_svn_tag_sha_range(tag)
+    print "[%s tag range on git %s Branch: %s %s (svn revs: %s %s)]" % (tag,rc,sha_st,sha_end, rv_st,rv_end)
+    with cchdir(git_repo_dir()):
+        sexe("git checkout %s" % rc)
+        #sexe('git tag -a v%s -m "tag %s release" %s' % (tag,tag,sha_end))
+        tag_info = svn_tag_info(tag)
+        tag_date = svn_date_to_git_date(tag_info["date"])
+        cmd ='GIT_AUTHOR_DATE="%s" GIT_COMMITTER_DATE="%s " ' % (tag_date,tag_date)
+        cmd += "git tag -a v%s " % tag
+        cmd += ' -m "tag %s release" ' % (tag)
+        cmd += " %s" % sha_end
+        sexe(cmd)
+
   
-def git_create_branch_for_tag_release(tag):
+def git_create_branch_for_tag_release_old(tag):
     rc = svn_tag_to_rc(tag)
     sha_st, rv_st, sha_end, rv_end  = git_find_svn_tag_sha_range(tag)
     print "[%s tag range on git %s Branch: %s %s (svn revs: %s %s)]" % (tag,rc,sha_st,sha_end, rv_st,rv_end)
@@ -398,6 +414,38 @@ def git_create_branch_for_tag_release(tag):
         sexe('git tag -a r%s.release.end   -m "tag r%s end" %s' % (tag,tag,sha_end))
         sexe("git checkout -b r%s %s" % (tag,sha_st))
         sexe("git merge %s" % sha_end)
+
+def git_create_branch_for_tag_release_old_2(tag):
+    rc = svn_tag_to_rc(tag)
+    sha_st, rv_st, sha_end, rv_end  = git_find_svn_tag_sha_range(tag)
+    print "[%s tag range on git %s Branch: %s %s (svn revs: %s %s)]" % (tag,rc,sha_st,sha_end, rv_st,rv_end)
+    with cchdir(git_repo_dir()):
+        # first release needs everything from the RC to beginning of time ... 
+        # if tag == "2.0.0":
+        #
+        # after this, we apply changes from the rc branches
+        sexe("git checkout %s" % rc)
+        sexe('git tag -a r%s.release.start -m "tag r%s start" %s' % (tag,tag,sha_st))
+        sexe('git tag -a r%s.release.end   -m "tag r%s end" %s' % (tag,tag,sha_end))
+        sexe("git checkout -b r%s %s" % (tag,sha_st))
+        sexe("git merge --squash %s" % sha_end)
+        sexe('git commit -m "%s release"' % tag)
+        patch_file = pjoin(root_dir(),"patches","pgen_tag_%s.patch" % tag)
+        if os.path.isfile(patch_file):
+            os.remvoe(patch_file)
+        # this will generated a combined patch that includes all the changes
+        # related to the relese
+        sexe("git format-patch %s  --stdout > %s" % (rc,patch_file))
+
+
+def git_create_branch_for_tag_release(tag):
+    rc = svn_tag_to_rc(tag)
+    sha_st, rv_st, sha_end, rv_end  = git_find_svn_tag_sha_range(tag)
+    print "[%s tag range on git %s Branch: %s %s (svn revs: %s %s)]" % (tag,rc,sha_st,sha_end, rv_st,rv_end)
+    with cchdir(git_repo_dir()):
+        sexe("git checkout %s" % rc)
+        #sexe('git tag -a r%s.release.start -m "tag r%s start" %s' % (tag,tag,sha_st))
+        sexe('git tag -a v%s -m "tag r%s end" %s' % (tag,tag,sha_end))
 
 
 def svn_date_to_git_date(svn_date):
@@ -409,10 +457,10 @@ def svn_date_to_git_date(svn_date):
     return datetime_to_git_date_format(dt) + utc_offset
 
 
-def git_merge_release_to_master_and_tag(tag):
+
+def git_merge_release_to_master_and_tag_old(tag):
     with cchdir(git_repo_dir()):
         sexe("git checkout master")
-        rcode, rout = sexe("git merge -X theirs --squash r%s" % tag,fatal_on_error=False)
         # check if conflicts were the reason we failed
         if rcode != 0 and len(git_ls_conflicts()) == 0:
             print "[UNKNOWN ERROR with merge -- stopping]"
