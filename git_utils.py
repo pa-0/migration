@@ -219,7 +219,8 @@ def git_gen_commit_filter_case(sha,ndate):
 
 def git_cleanup_fix_clearquest_commit_dates():
     git_write_clearquest_commit_date_filter()
-    sexe("sh_git_fix_clearquest_commit_dates.sh")
+    sexe("chmod +x sh_git_fix_clearquest_commit_dates.sh")
+    sexe("./sh_git_fix_clearquest_commit_dates.sh")
 
 def git_cleanup_remove_rtags():
     tags = git_ls_tags()
