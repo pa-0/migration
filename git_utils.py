@@ -315,7 +315,6 @@ def git_setup_new_repo():
     with cchdir(git_repo_dir()):
         sexe("git init")
         sexe("git checkout -b develop")
-        sexe("git branch -D master")
         sexe("touch .gitignore")
         sexe("git add .gitignore")
         sexe('git commit -m "initialize repo"')
