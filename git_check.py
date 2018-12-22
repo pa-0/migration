@@ -58,17 +58,24 @@ def stage_pair(a,b):
         with cchdir(ndir):
             sexe("tar -xzvf %s" % bf)
         sexe("diff -bur stage_%s_new/src/ stage_%s_old/visit%s/src/ > mout_diff_%s.txt" % (r_val,r_val,r_val,r_val), fatal_on_error=False)
-         
+
+def cycle_rc_checkouts():
+    branches = git_ls_branches()
+    for b in branches:
+        with cchdir(git_repo_dir()):
+            sexe('git checkout %s' % b)
+
 
 
 def git_check():
     #git_check_gen_tag_tarballs() 
     #
-    p = find_pairs()
-    for k,v in p.items():
+    #p = find_pairs()
+    #for k,v in p.items():
     #     if k.count("2.13.3") > 0:
-         stage_pair(k,v)
+    #     stage_pair(k,v)
     #    sys.exit(0)
+    cycle_rc_checkouts()
 
 if __name__ == "__main__":
     git_check()

@@ -50,11 +50,11 @@ def git_graft_tag_releases():
               git_tag_release(release)
 
 def git_graft():
-    generate_rc_branch_patches()
-    git_graft_initial_setup()
-    git_graft_setup_develop()
-    git_graft_create_rc_branches()
-    git_graft_tag_releases()
+    #generate_rc_branch_patches()
+    #git_graft_initial_setup()
+    #git_graft_setup_develop()
+    #git_graft_create_rc_branches()
+    #git_graft_tag_releases()
     git_final_cleaup()
 
 if __name__ == "__main__":

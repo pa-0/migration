@@ -205,7 +205,7 @@ def git_write_clearquest_commit_date_filter():
         ndate = visit_clearquest_date_to_git_date(cmt)
         cmd += git_gen_commit_filter_case(cmt["sha"],ndate)
     cmd += "'\n"
-    open("sh_git_fix_clearquest_commit_dates.sh","w").write(cmd)
+    open("../sh_git_fix_clearquest_commit_dates.sh","w").write(cmd)
 
     
 def git_gen_commit_filter_case(sha,ndate):
@@ -219,8 +219,8 @@ def git_gen_commit_filter_case(sha,ndate):
 
 def git_cleanup_fix_clearquest_commit_dates():
     git_write_clearquest_commit_date_filter()
-    sexe("chmod +x sh_git_fix_clearquest_commit_dates.sh")
-    sexe("./sh_git_fix_clearquest_commit_dates.sh")
+    sexe("chmod +x ../sh_git_fix_clearquest_commit_dates.sh")
+    sexe("../sh_git_fix_clearquest_commit_dates.sh")
 
 def git_cleanup_remove_rtags():
     tags = git_ls_tags()
@@ -247,13 +247,15 @@ def git_final_cleaup():
     with cchdir(git_repo_dir()):
         # may sure we are on develop, we dont' want
         # errors related to deling branches we are on
-        sexe("git checkout develop")
+        #sexe("git checkout develop")
         # fix cq dates
-        git_cleanup_fix_clearquest_commit_dates()
+        #git_cleanup_fix_clearquest_commit_dates()
         # remove svn remotes
-        git_cleanup_remove_svn_remotes()
+        #git_cleanup_remove_svn_remotes()
         # run git gc to cleanup
-        git_gc()
+        #git_gc()
+        git_gen_lfs_migrate_script()
+        git_run_lfs_migrate()
 
 
 def git_gc():
@@ -432,9 +434,13 @@ def git_gen_lfs_migrate_script():
         cmd = 'git lfs migrate import --include="%s" ' % cases_str
         for branch in git_ls_branches():
             cmd += " --include-ref=refs/heads/%s" % branch
-        open("sh_git_lfs_migrate.sh","w").write(cmd + "\n")
+        open("../sh_git_lfs_migrate.sh","w").write(cmd + "\n")
     
-    
+def git_run_lfs_migrate():
+    with cchdir(git_repo_dir()):
+        sexe("chmod +x ../sh_git_lfs_migrate.sh")
+        sexe("../sh_git_lfs_migrate.sh")
+
 
 
 
