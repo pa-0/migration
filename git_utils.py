@@ -247,15 +247,15 @@ def git_final_cleaup():
     with cchdir(git_repo_dir()):
         # may sure we are on develop, we dont' want
         # errors related to deling branches we are on
-        #sexe("git checkout develop")
+        sexe("git checkout develop")
         # fix cq dates
-        #git_cleanup_fix_clearquest_commit_dates()
+        git_cleanup_fix_clearquest_commit_dates()
         # remove svn remotes
-        #git_cleanup_remove_svn_remotes()
+        git_cleanup_remove_svn_remotes()
         # run git gc to cleanup
-        #git_gc()
+        git_gc()
         git_gen_lfs_migrate_script()
-        git_run_lfs_migrate()
+        #git_run_lfs_migrate()
 
 
 def git_gc():
