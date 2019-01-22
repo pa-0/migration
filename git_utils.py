@@ -247,13 +247,14 @@ def git_final_cleaup():
     with cchdir(git_repo_dir()):
         # may sure we are on develop, we dont' want
         # errors related to deling branches we are on
-        sexe("git checkout develop")
+        #sexe("git checkout develop")
         # fix cq dates
-        git_cleanup_fix_clearquest_commit_dates()
+        #git_cleanup_fix_clearquest_commit_dates()
         # remove svn remotes
-        git_cleanup_remove_svn_remotes()
+        #git_cleanup_remove_svn_remotes()
+        #
         # run git gc to cleanup
-        git_gc()
+        #git_gc()
         git_gen_lfs_migrate_script()
         #git_run_lfs_migrate()
 
@@ -404,13 +405,15 @@ def git_gen_lfs_migrate_script():
     with cchdir(git_repo_dir()):
         cases = ["data/*.h5nimrod",
              "data/*.pdb",
-             "data/*.data",
-             "docs/*.png",
-             "docs/*.jpg",
-             "docs/*.jpeg",
-             "docs/*.tif",
-             "test/*.tif",
-             "test/*.png",
+             "data/*.dat",
+             "test/**/*.png",
+             "test/**/*.tif",
+             "test/**/*.jpg",
+             "test/**/*.jpeg",
+             "docs/**/*.png",
+             "docs/**/*.jpg",
+             "docs/**/*.tif",
+             "docs/**/*.fm",
              "*.xyz",
              "*.tar",
              "*.gz",
@@ -429,9 +432,12 @@ def git_gen_lfs_migrate_script():
              "*.dylib",
              "*.dll",
              "*.so"]
-
-        cases_str = ",".join(cases)
-        cmd = 'git lfs migrate import --include="%s" ' % cases_str
+        cmd = 'git lfs migrate import '
+        ecases = [ "docs/SphynxDocs/**/*.png"]
+        ecases_str = ",".join(ecases)
+        cmd += ' --exclude="%s" ' % ecases_str
+        icases_str = ",".join(cases)
+        cmd += ' --include="%s" ' % icases_str
         for branch in git_ls_branches():
             cmd += " --include-ref=refs/heads/%s" % branch
         open("../sh_git_lfs_migrate.sh","w").write(cmd + "\n")
